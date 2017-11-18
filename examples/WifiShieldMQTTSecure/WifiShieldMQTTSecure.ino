@@ -42,8 +42,8 @@ unsigned long ntpLastTimeSeconds;
 WiFiClientSecure espClient;
 PubSubClient clientMQTT(espClient);
 
-const char* ssid = "LaMaisonBleue";
-const char* password = "willandmarionliketoplayboardgames";
+const char* ssid = "****";
+const char* password = "****";
 
 ///////////////////////////////////////////
 // Utility functions
