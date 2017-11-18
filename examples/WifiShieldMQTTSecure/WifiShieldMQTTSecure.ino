@@ -11,8 +11,7 @@
 #include <ESP8266WiFi.h>
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
-#include <ESP8266HTTPUpdateServer.h>
-#include <WiFiManager.h>
+// #include <ESP8266HTTPUpdateServer.h>
 #include "SPISlave.h"
 #include <ESP8266mDNS.h>
 #include <ArduinoJson.h>
@@ -28,7 +27,7 @@ boolean waitingOnNTP;
 boolean wifiReset;
 
 ESP8266WebServer server(80);
-ESP8266HTTPUpdateServer httpUpdater;
+// ESP8266HTTPUpdateServer httpUpdater;
 
 String jsonStr;
 
@@ -42,6 +41,9 @@ unsigned long ntpLastTimeSeconds;
 
 WiFiClientSecure espClient;
 PubSubClient clientMQTT(espClient);
+
+const char* ssid = "LaMaisonBleue";
+const char* password = "willandmarionliketoplayboardgames";
 
 ///////////////////////////////////////////
 // Utility functions
@@ -126,16 +128,6 @@ void callbackMQTT(char* topic, byte* payload, unsigned int length) {
   #endif
 }
 #endif
-/**
-* Used when
-*/
-void configModeCallback (WiFiManager *myWiFiManager) {
-  #ifdef DEBUG
-  Serial.println(WiFi.softAPIP());
-  Serial.println(myWiFiManager->getConfigPortalSSID());
-  #endif
-}
-
 
 ///////////////////////////////////////////////////
 // HTTP Rest Helpers
@@ -371,9 +363,9 @@ void mqttSetup() {
   }
   sendHeadersForCORS();
   if (connected) {
-    return server.send(200, RETURN_TEXT_JSON, wifi.getInfoMQTT(true));
+    return server.send(200, RETURN_TEXT_JSON, "{\"connected\":true}");
   } else {
-    return server.send(505, RETURN_TEXT_JSON, wifi.getInfoMQTT(false));
+    return server.send(505, RETURN_TEXT_JSON, "{\"connected\":false}");
   }
 }
 #endif
@@ -412,29 +404,25 @@ void initializeVariables() {
 }
 
 void setup() {
+
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+#ifdef DEBUG
+    Serial.print(".");
+#endif
+  }
+
   initializeVariables();
 
-  #ifdef DEBUG
+#ifdef DEBUG
   Serial.begin(230400);
   Serial.setDebugOutput(true);
   Serial.println("Serial started");
-  #endif
+#endif
 
   wifi.begin();
-
-  //WiFiManager
-  //Local intialization. Once its business is done, there is no need to keep it around
-  WiFiManager wifiManager;
-  WiFiManagerParameter custom_text("<p>Powered by Push The World</p>");
-  wifiManager.addParameter(&custom_text);
-
-  wifiManager.setAPCallback(configModeCallback);
-
-  //and goes into a blocking loop awaiting configuration
-#ifdef DEBUG
-  Serial.println("Wifi manager started...");
-#endif
-  wifiManager.autoConnect(wifi.getName().c_str());
 
 #ifdef DEBUG
   Serial.printf("Turning LED Notify light on\nStarting ntp...\n");
@@ -572,7 +560,7 @@ void setup() {
   });
   server.on(HTTP_ROUTE_WIFI, HTTP_OPTIONS, sendHeadersForOptions);
 
-  httpUpdater.setup(&server);
+  // httpUpdater.setup(&server);
 
   server.begin();
   MDNS.addService("http", "tcp", 80);

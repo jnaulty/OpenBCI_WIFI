@@ -359,20 +359,6 @@ void udpSetup() {
   }
   wifi.setInfoUDP(tempAddr, port, tcpDelimiter);
 
-  if (root.containsKey(JSON_SAMPLE_NUMBERS)) {
-    wifi.jsonHasSampleNumbers = root[JSON_SAMPLE_NUMBERS];
-#ifdef DEBUG
-    Serial.print("Set jsonHasSampleNumbers to "); Serial.println(wifi.jsonHasSampleNumbers ? String("true") : String("false"));
-#endif
-  }
-
-  if (root.containsKey(JSON_TIMESTAMPS)) {
-    wifi.jsonHasTimeStamps = root[JSON_TIMESTAMPS];
-#ifdef DEBUG
-    Serial.print("Set jsonHasTimeStamps to "); Serial.println(wifi.jsonHasTimeStamps ? String("true") : String("false"));
-#endif
-  }
-
 #ifdef DEBUG
   Serial.print("Got ip: "); Serial.println(wifi.tcpAddress.toString());
   Serial.print("Got port: "); Serial.println(wifi.tcpPort);
@@ -698,7 +684,7 @@ void loop() {
     packetsToSend = MAX_PACKETS_PER_SEND_TCP;
   }
   if((clientTCP.connected() || wifi.curOutputProtocol == wifi.OUTPUT_PROTOCOL_SERIAL || wifi.curOutputProtocol == wifi.OUTPUT_PROTOCOL_UDP) && (micros() > (lastSendToClient + wifi.getLatency()) || packetsToSend == MAX_PACKETS_PER_SEND_TCP) && (packetsToSend > 0)) {
-    Serial.printf("LS2C: %lums H: %u T: %u P2S: %d", (micros() - lastSendToClient)/1000, wifi.rawBufferHead, wifi.rawBufferTail, packetsToSend);
+    // Serial.printf("LS2C: %lums H: %u T: %u P2S: %d", (micros() - lastSendToClient)/1000, wifi.rawBufferHead, wifi.rawBufferTail, packetsToSend);
     digitalWrite(LED_NOTIFY, LOW);
 
     uint32_t taily = wifi.rawBufferTail;
